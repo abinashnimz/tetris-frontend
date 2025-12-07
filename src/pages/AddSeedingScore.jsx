@@ -10,8 +10,27 @@ export const AddSeedingScore = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const handleAddScore = async () => {
-        console.log("handlescore working")
+    const navigate = useNavigate();
+
+    const handleAddScore = async (id) => {
+        try {
+
+            console.log(id);
+
+            const res = await axios.post(`/api/seeding/update-score/${id}`, {
+                score: score
+            },
+            {
+                headers: { "Content-Type": "application/json" }
+            });
+            console.log(res);
+            if (res.status === 200) {
+                setError(null);
+                navigate(0);
+            }
+        } catch (err) {
+            setError(err.message);
+        }
     }
 
     useEffect(() => {
@@ -19,7 +38,7 @@ export const AddSeedingScore = () => {
             console.log("useeffect working")
             try {
                 const response = await axios.get("/api/seeding/scores");
-                console.log(response);
+                console.log(response.data);
                 if (response) setPlayers(response.data);
             } catch (err) {
                 setError("Failed to fetch players");
@@ -49,16 +68,16 @@ export const AddSeedingScore = () => {
                         <tbody>
                             {players.map((player) => (
                                 <tr key={player._id}>
-                                    <td className="border p-2">{player.fullName}</td>
-                                    <td className="border p-2">{player.country}</td>
+                                    <td className="border p-2">{player.player.fullName}</td>
+                                    <td className="border p-2">{player.player.country}</td>
                                     <td className="border p-2">
                                         {player.scores?.join(", ")}
                                     </td>
                                     <td className="border p-2">
-                                        <input type="text" />
+                                        <input type="text" id="score" name="score" className="border rounded w-[50%] py-2 px-3 mb-2" placeholder="Score" required value={score} onChange={(e) => setScore(e.target.value)} />
                                     </td>
                                     <td className="border-b p-2">
-                                        <button onClick={()=>handleAddScore(player._id)} className="bg-green-400 hover:bg-green-500 text-white font-bold py-2 px-8 rounded-full focus:outline-none focus:shadow-outline cursor-pointer">Add</button>
+                                        <button onClick={()=>handleAddScore(player.player._id)} className="bg-green-400 hover:bg-green-500 text-white font-bold py-2 px-8 rounded-full focus:outline-none focus:shadow-outline cursor-pointer">Add</button>
                                     </td>
                                 </tr>
                             ))}
